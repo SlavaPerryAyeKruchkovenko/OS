@@ -1,10 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define  MAX 64
+#define  MIN 32
 #include <stdio.h>
 #include <windows.h>
 #include <fileapi.h>
 #include <string.h>
 #include <winnt.h>
 
-#define PATH = L"/resumes/";
+
 void clear(){
     system("cls");
 }
@@ -12,7 +15,7 @@ HANDLE createFile(LPCSTR nameOfFile){
 	return CreateFile(
 		nameOfFile,
 		GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		FILE_SHARE_READ,
 		NULL,
 		OPEN_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
@@ -30,11 +33,11 @@ DWORD writeFile(HANDLE file,char* text,int size){
 	);
 	return bytesWritten;
 }
-void printAllNameOfResume(char *path){
-	
+void printAllNameOfResume(HANDLE file){
+	SetFilePointer(file,0,0,FILE_END);
 }
 void openFile(char *nameOfFile){
-
+	
 }
 void lockFile(HANDLE file,int start){
 	OVERLAPPED ol;
@@ -43,42 +46,23 @@ void lockFile(HANDLE file,int start){
 	ol.hEvent = NULL;
 	LockFileEx(file,0,0,192,0,&ol);
 }
-void registerBlank(char* nameOfRes, HANDLE file){	
+void writeField(char result[],char name[],char* text,char* text2,HANDLE file){
+	memset(result,0,MAX);
+	printf("%s", text);
+	fscanf(stdin,"%s",name);
+	snprintf(result, MAX, "%s%s", text2, name);		
+	writeFile(file,result,MAX);
+}
+void registerBlank(HANDLE file){	
 	SetFilePointer(file,0,0,FILE_END);
-	char name[16];
-	char result[32];
-	snprintf(result, sizeof  result, "%s%s", "\n:", nameOfRes);	
-	writeFile(file,result,32);
-
-	memset(result,0,32);
-	printf("write name\n");
-	fscanf(stdin,"%s",name);
-	snprintf(result, sizeof  result, "%s%s", "\nname:", name);	
-	writeFile(file,result,32);
-
-	memset(result,0,32);
-	printf("write sex\n");
-	fscanf(stdin,"%s",name);
-	snprintf(result, sizeof  result, "%s%s", "\nsex:", name);		
-	writeFile(file,result,32);
-	
-	memset(result,0,32);
-	printf("write post\n");
-	fscanf(stdin,"%s",name);
-	snprintf(result, sizeof  result, "%s%s", "\npost:", name);		
-	writeFile(file,result,32);
-
-	memset(result,0,32);
-	printf("write experience\n");
-	fscanf(stdin,"%s",name);
-	snprintf(result, sizeof  result, "%s%s", "\nexperience:", name);		
-	writeFile(file,result,32);
-
-	memset(result,0,32);
-	printf("Write year of born\n");
-	fscanf(stdin,"%s",name);	
-	snprintf(result, sizeof  result, "%s%s", "\nyear of born:", name);		
-	writeFile(file,result,32);
+	char name[MIN];
+	char result[MAX];
+	writeField(result,name,"Write name of resume\n","\n",file);
+	writeField(result,name,"write name\n","\nname:",file);
+	writeField(result,name,"write sex\n","\nsex:",file);
+	writeField(result,name,"write post\n","\npost:",file);
+	writeField(result,name,"write experience\n","\nexperience:",file);
+	writeField(result,name,"Write year of born\n","\nyear of born:",file);
 }
 int main()
 {
@@ -97,17 +81,11 @@ int main()
 		}
 		clear();
 		if(res == 1){
-			printf("New resume\n");
-			printf("Write name of resume\n");
-
-			char name[32];
-			fscanf(stdin,"%s",name);	
-
-			registerBlank(name,file);
+			registerBlank(file);
 		}
 		else if(res == 2){
 			printf("All resume\n");
-			char result[512];
+			char result[64];
 			snprintf(result, sizeof  result, "%s%s", path, "*.bin");
 			printAllNameOfResume(result);
 			FILE* input;
