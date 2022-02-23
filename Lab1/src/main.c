@@ -7,12 +7,13 @@
 #include <string.h>
 #include <winnt.h>
 
-
-void clear(){
-    system("cls");
-}
-HANDLE createFile(LPCSTR nameOfFile){
-	return CreateFile(
+typedef struct Profile {
+    char name[MIN];
+    char nameOfWork[MAX];
+    int age;
+} Profile;
+HANDLE openFile(LPCSTR nameOfFile){
+	HANDLE file = CreateFile(
 		nameOfFile,
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ,
@@ -21,94 +22,138 @@ HANDLE createFile(LPCSTR nameOfFile){
 		FILE_ATTRIBUTE_NORMAL,
 		NULL
 	);
+	return file;
 }
-DWORD writeFile(HANDLE file,char* text,int size){
+DWORD writeFile(HANDLE file,char* data,int size){
 	DWORD bytesWritten;
 	WriteFile(
 		file,
-		text,
+		data,
 		size,
 		&bytesWritten,
 		NULL
 	);
 	return bytesWritten;
 }
-void printAllNameOfResume(HANDLE file){
-	SetFilePointer(file,0,0,FILE_END);
-}
-void openFile(char *nameOfFile){
-	
-}
-void lockFile(HANDLE file,int start){
+void lockFile(HANDLE file,int start,int size,int access){
 	OVERLAPPED ol;
 	ol.OffsetHigh=0;
 	ol.Offset=start;
 	ol.hEvent = NULL;
-	LockFileEx(file,0,0,192,0,&ol);
+	LockFileEx(file,access,0,size,0,&ol);
 }
-void writeField(char result[],char name[],char* text,char* text2,HANDLE file){
-	memset(result,0,MAX);
-	printf("%s", text);
-	fscanf(stdin,"%s",name);
-	snprintf(result, MAX, "%s%s", text2, name);		
-	writeFile(file,result,MAX);
+Profile readFile(HANDLE file,int size){
+	Profile data;
+	DWORD bytesWritten;
+	ReadFile(file,
+            (char*)&data,
+            size,
+            &bytesWritten,
+    		NULL);
+	return 	data;	
 }
-void registerBlank(HANDLE file){	
-	SetFilePointer(file,0,0,FILE_END);
-	char name[MIN];
-	char result[MAX];
-	writeField(result,name,"Write name of resume\n","\n",file);
-	writeField(result,name,"write name\n","\nname:",file);
-	writeField(result,name,"write sex\n","\nsex:",file);
-	writeField(result,name,"write post\n","\npost:",file);
-	writeField(result,name,"write experience\n","\nexperience:",file);
-	writeField(result,name,"Write year of born\n","\nyear of born:",file);
+Profile readProfile(HANDLE file,int numOfResume){
+	int startPoint = sizeof(Profile) * (numOfResume - 1);
+	SetFilePointer(file, sizeof(Profile) * (numOfResume - 1), 0, FILE_BEGIN);
+	lockFile(file,startPoint,sizeof(Profile),0);
+	return readFile(file,sizeof(Profile));
+}
+Profile registerBlank(){	
+
+	Profile anketa;
+	int res = 0;
+	printf("Print age\n");
+	scanf_s("%d", &res);
+	anketa.age = res;
+
+	printf("Print name\n");
+	fscanf(stdin,"%s",anketa.name);
+
+	printf("Print name of work\n");
+	fscanf(stdin,"%s",anketa.nameOfWork);
+	return anketa;
+}
+void writeProfileInFile(HANDLE file,Profile profile){
+	SetFilePointer(file,0,0,FILE_END);	
+	writeFile(file,(char*)&profile,sizeof(profile));
+}
+void editProfile(HANDLE file,int numOfResume){
+	int startPoint = sizeof(Profile) * (numOfResume - 1);	
+	lockFile(file,startPoint,sizeof(Profile),LOCKFILE_EXCLUSIVE_LOCK);
+	Profile profile = registerBlank();	
+	SetFilePointer(file,startPoint,0,FILE_BEGIN);	
+	writeFile(file,(char*)&profile,sizeof(profile));
+	CloseHandle(file);
+}
+void writeProfile(Profile profile){
+	printf("%d\n", profile.age);
+	printf("%s\n", profile.name);
+	printf("%s\n", profile.nameOfWork);
+}
+void writeProfiles(HANDLE file){
+	Profile profile;
+	DWORD readedBytes;
+	int numOfResume = 1;
+	do{
+		ReadFile(file, (char*)&profile, sizeof(Profile), &readedBytes, NULL);
+		if (readedBytes != 0)
+		{
+			printf_s("num of resume %d\n",numOfResume);
+			writeProfile(profile);
+			numOfResume++;
+		}
+	}
+	while (readedBytes != 0);
+}
+void clear(){
+    system("cls");
 }
 int main()
 {
 	char* path  = "D:\\repoditory\\OS\\Lab1\\resumes\\slava.bin";	
-	HANDLE file = createFile(path);
+	HANDLE file;
 	printf("Hello\n");
 	while(1){
+		file = openFile(path);
+		fflush(stdin);
 		clear();
-		printf("What are you want 1-Create Resume 2-Write Resume\n");
+		writeProfiles(file);
+
+		printf_s("What are you want 1-Create Resume 2-Read Resumes\n");
 		int res = 0;
 		scanf_s("%d", &res); 
 		while(res < 0 || res > 2){
-			printf_s("please input correct value");
+			printf_s("please input correct value\n");
 			printf_s("What are you want 1-Create File 2-Write Files\n");
 			scanf_s("%d", &res); 
 		}
 		clear();
 		if(res == 1){
-			registerBlank(file);
+			Profile profile = registerBlank();
+			writeProfileInFile(file, profile);
 		}
 		else if(res == 2){
-			printf("All resume\n");
-			char result[64];
-			snprintf(result, sizeof  result, "%s%s", path, "*.bin");
-			printAllNameOfResume(result);
-			FILE* input;
-			char name[32];
-			do{
-				printf("Select resume\n");	
-				fscanf(stdin,"%s",name);
-				snprintf(name, sizeof  result, "%s%s", name, ".bin");
-				snprintf(result, sizeof  result, "%s%s", path, name);
-				input = fopen(result, "r");
-				if(!input){
-					printf("incorrect resume\n");	
-				}
-			}			
-			while(!input);
-			do{
-				printf("What are you want 1-Edit 2- Open\n");
-				scanf_s("%d", &res); 
-				if(res < 0 || res > 3){
-					printf("incorrect name\n");
-				}
-			}
-			while(res < 1 || res > 3);
+			fflush(stdin);
+			printf("inpurt num of resume\n");
+			scanf_s("%d", &res); 
+
+			Profile profile = readProfile(file,res);
+			writeProfile(profile);
+			CloseHandle(file);
+
+			printf("Do you wanna edit y/n\n");
+			int letter = getch();
+			if(letter == 'y'){	
+				file = openFile(path);
+				editProfile(file,res);
+			}		
+		}
+		fflush(stdin);
+		printf_s("Do you wanna exit? y/n\n");
+		res = getch();	
+		CloseHandle(file);
+		if(res == 'y'){
+			return 0;
 		}
 	}	
 	return 0;
