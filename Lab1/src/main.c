@@ -110,7 +110,7 @@ void clear(){
 }
 int main()
 {
-	char* path  = "D:\\repoditory\\OS\\Lab1\\resumes\\slava.bin";	
+	char* path  = "D:\\slava.bin";	//write your path
 	HANDLE file;
 	printf("Hello\n");
 	while(1){
