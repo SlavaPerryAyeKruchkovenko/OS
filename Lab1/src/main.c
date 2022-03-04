@@ -16,7 +16,7 @@ HANDLE openFile(LPCSTR nameOfFile){
 	HANDLE file = CreateFile(
 		nameOfFile,
 		GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL,
 		OPEN_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
@@ -41,6 +41,13 @@ void lockFile(HANDLE file,int start,int size,int access){
 	ol.Offset=start;
 	ol.hEvent = NULL;
 	LockFileEx(file,access,0,size,0,&ol);
+}
+void unlockFile(HANDLE file,int start,int size,int access){
+	OVERLAPPED ol;
+	ol.OffsetHigh=0;
+	ol.Offset=start;
+	ol.hEvent = NULL;
+	UnlockFileEx(file,access, 0, size, &ol);
 }
 Profile readFile(HANDLE file,int size){
 	Profile data;
@@ -138,6 +145,7 @@ int main()
 			scanf_s("%d", &res); 
 
 			Profile profile = readProfile(file,res);
+			unlockFile(file,sizeof(Profile) * (res - 1),sizeof(Profile),FILE_SHARE_READ | FILE_SHARE_WRITE);
 			writeProfile(profile);
 			CloseHandle(file);
 
