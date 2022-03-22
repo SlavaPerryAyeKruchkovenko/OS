@@ -16,29 +16,29 @@
 
 void checkOwner(struct stat buf) {
   printf("\nowner ");
-  if (buf.st_mode & Uread)
+  if (buf.st_mode & S_IRUSR)
     printf("read ");
-  if (buf.st_mode & Uwrite)
+  if (buf.st_mode & S_IWUSR)
     printf("write ");
-  if (buf.st_mode & Uuse)
+  if (buf.st_mode & S_IXUSR)
     printf("use ");
 }
 void checkGroup(struct stat buf) {
   printf("\ngroup ");
-  if (buf.st_mode & Gread)
+  if (buf.st_mode & S_IRGRP)
     printf("read ");
-  if (buf.st_mode & Gwrite)
+  if (buf.st_mode & S_IWGRP)
     printf("write ");
-  if (buf.st_mode & Guse)
+  if (buf.st_mode & S_IXGRP)
     printf("use ");
 }
 void checkOther(struct stat buf) {
   printf("\nother ");
-  if (buf.st_mode & Oread)
+  if (buf.st_mode & S_IROTH)
     printf("read ");
-  if (buf.st_mode & Owrite)
+  if (buf.st_mode & S_IWOTH)
     printf("write ");
-  if (buf.st_mode & Ouse)
+  if (buf.st_mode & S_IXOTH)
     printf("use ");
 }
 void checkFile(struct stat buf) {
