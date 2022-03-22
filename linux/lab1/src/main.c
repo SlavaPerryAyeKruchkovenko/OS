@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 
 #define Uread 0x00400
 #define Uwrite 0x00200
@@ -12,7 +15,7 @@
 #define Ouse 0x00001
 
 void checkOwner(struct stat buf) {
-  printf("\nowner");
+  printf("\nowner ");
   if (buf.st_mode & Uread)
     printf("read ");
   if (buf.st_mode & Uwrite)
@@ -21,7 +24,7 @@ void checkOwner(struct stat buf) {
     printf("use ");
 }
 void checkGroup(struct stat buf) {
-  printf("\ngroup");
+  printf("\ngroup ");
   if (buf.st_mode & Gread)
     printf("read ");
   if (buf.st_mode & Gwrite)
@@ -30,7 +33,7 @@ void checkGroup(struct stat buf) {
     printf("use ");
 }
 void checkOther(struct stat buf) {
-  printf("\nother");
+  printf("\nother ");
   if (buf.st_mode & Oread)
     printf("read ");
   if (buf.st_mode & Owrite)
@@ -39,22 +42,26 @@ void checkOther(struct stat buf) {
     printf("use ");
 }
 void checkFile(struct stat buf) {
-  printf("\nFile");
+  printf("\nFile ");
   if ((buf.st_mode & S_IFMT) == S_IFREG)
-    printf("\ndefault file");
+    printf("default file");
   else if ((buf.st_mode & S_IFMT) == S_IFDIR)
-    printf("\ndirecrory");
+    printf("direcrory");
   else if ((buf.st_mode & S_IFMT) == S_IFCHR)
-    printf("\nsign device");
+    printf("sign device");
   /*else if ((buf.st_mode & S_IFMT) == S_IFIFO)
     printf("\nFIFO");*/ //work only on linux
 }
-int main() {
-  printf("Print path\n");
-  char *path;
-  fscanf(stdin, "%s", path);
+int main(int argc, char *argv[]) {
   struct stat buf;
-  int res = stat(path, &buf);
+  if (argc != 2) {
+    fprintf(stderr, "Использование: %s <путь>\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
+  if (stat(argv[1], &buf) == -1) {
+    perror("stat");
+    exit(EXIT_FAILURE);
+  }
   checkFile(buf);
   checkOwner(buf);
   checkGroup(buf);
