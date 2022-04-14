@@ -170,6 +170,7 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 lpData->hPen = CreatePen(PS_DOT, 2, RGB(0, 0, 0));
             lpData->x = 0;
             lpData->y = 0;
+            MoveWindow(hWnd, lpData->x, lpData->y, 200, 200, TRUE);
             InvalidateRect(hWnd, nullptr, TRUE);
             break;
         case WM_LBUTTONUP:
@@ -182,14 +183,15 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             GetCursorPos(&p);
             lpData = (ButtonData *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
             if (p.x < point.x)
-                lpData->x = lpData->x + 2;
+                lpData->x = lpData->x + 1;
             else
-                lpData->x = lpData->x - 2;
+                lpData->x = lpData->x - 1;
             if (p.y < point.y)
-                lpData->y = lpData->y - 2;
+                lpData->y = lpData->y - 1;
             else
-                lpData->y = lpData->y + 2;
-            MoveWindow(hWnd, lpData->x, lpData->y, 200, 200, TRUE);
+                lpData->y = lpData->y + 1;
+            if (lpData->y % 2 == 0)
+                MoveWindow(hWnd, lpData->x, lpData->y, 200, 200, TRUE);
             point = p;
 
             break;
