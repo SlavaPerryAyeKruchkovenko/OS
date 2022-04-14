@@ -51,3 +51,7 @@ Mkfile.old
 dkms.conf
 
 .vscode/
+
+desktop/lab1/.idea/
+
+desktop/lab1/cmake-build-debug/
