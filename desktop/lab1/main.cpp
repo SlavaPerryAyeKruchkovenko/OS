@@ -1,6 +1,16 @@
 #include <windows.h>
 #include <conio.h>
-#include <cstdio>
+
+
+typedef struct ButtonData {
+    HBRUSH hBrush;
+    HPEN hPen;
+    bool isClick;
+    int x;
+    int y;
+} ButtonData;
+
+POINT point;
 
 HINSTANCE hInst;
 
@@ -14,6 +24,7 @@ void RegisterBtn(HINSTANCE hInstance);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 
+    GetCursorPos(&point);
     MSG msg;
     HWND hWnd;
 
@@ -76,6 +87,7 @@ CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT Rect;
     int width = 200;
     int height = 200;
+
     switch (message) {
         case WM_CREATE:
             GetClientRect(hWnd, &Rect);
@@ -84,14 +96,19 @@ CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
                                    (Rect.right - Rect.left) / 2 - width / 2,
                                    (Rect.bottom - Rect.top) / 2 - height / 2,
                                    width, height,
-                                   hWnd, nullptr, hInst, nullptr);
+                                   hWnd,
+                                   nullptr,
+                                   hInst,
+                                   nullptr);
             InvalidateRect(hWndBtn, nullptr, TRUE);
             break;
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
-                case 1001:
+                case 228:
                     MessageBox(hWnd,
-                               TEXT("Нажата большая кнопка!"), TEXT("Очень важно!"), MB_OK);
+                               TEXT("Евреи-хипстеры не делают обрезание. Они подворачивают."),
+                               TEXT("Шутка!"),
+                               MB_OK);
                     break;
             }
             break;
@@ -105,11 +122,6 @@ CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     return 0;
 }
 
-typedef struct _ButtonData {
-    HBRUSH hBrush;
-    HPEN hPen;
-    bool isClick;
-} ButtonData;
 
 LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     PAINTSTRUCT ps;
@@ -123,6 +135,8 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             lpData->hBrush = CreateSolidBrush(RGB(255, 255, 0));
             lpData->hPen = CreatePen(PS_DOT, 2, RGB(0, 0, 255));
             lpData->isClick = false;
+            lpData->x = 0;
+            lpData->y = 0;
             break;
         case WM_PAINT:
             lpData = (ButtonData *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
@@ -140,6 +154,7 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             LineTo(hdc, rect.left, rect.bottom * 3 / 4);
             LineTo(hdc, (rect.right - rect.left) / 2, rect.top);
             EndPaint(hWnd, &ps);
+
             break;
         case WM_LBUTTONDOWN:
             lpData = (ButtonData *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
@@ -153,14 +168,29 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 lpData->hPen = CreatePen(PS_DOT, 2, RGB(0, 0, 255));
             else
                 lpData->hPen = CreatePen(PS_DOT, 2, RGB(0, 0, 0));
+            lpData->x = 0;
+            lpData->y = 0;
             InvalidateRect(hWnd, nullptr, TRUE);
             break;
         case WM_LBUTTONUP:
             lpData = (ButtonData *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            lpData->isClick = !lpData->isClick
-            SendMessage(GetParent(hWnd), WM_COMMAND, MAKELONG(GetMenu(hWnd), 0), 0);
+            lpData->isClick = !lpData->isClick;
+            SendMessage(GetParent(hWnd), WM_COMMAND, MAKELONG(228, 0), 0);
             break;
         case WM_MOUSEMOVE:
+            POINT p;
+            GetCursorPos(&p);
+            lpData = (ButtonData *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            if (p.x < point.x)
+                lpData->x = lpData->x + 2;
+            else
+                lpData->x = lpData->x - 2;
+            if (p.y < point.y)
+                lpData->y = lpData->y - 2;
+            else
+                lpData->y = lpData->y + 2;
+            MoveWindow(hWnd, lpData->x, lpData->y, 200, 200, TRUE);
+            point = p;
 
             break;
         case WM_DESTROY:
