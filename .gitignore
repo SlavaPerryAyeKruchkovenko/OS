@@ -55,3 +55,7 @@ dkms.conf
 desktop/lab1/.idea/
 
 desktop/lab1/cmake-build-debug/
+
+windows/lab2/.idea/
+
+windows/lab2/cmake-build-debug/
