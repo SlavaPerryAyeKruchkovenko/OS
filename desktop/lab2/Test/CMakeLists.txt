@@ -8,3 +8,5 @@ link_directories(lib)
 add_executable(Test main.cpp)
 
 target_link_libraries(Test libmath.dll)
+
+target_link_libraries(Test libcomplex.dll)
