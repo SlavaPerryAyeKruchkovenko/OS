@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fileapi.h>
+#include <libloaderapi.h>
+
 
 #ifdef __cplusplus
 
@@ -12,25 +15,32 @@ double Sum(double num1, double num2);
 
 double Sub(double num1, double num2);
 
-struct complex MulComp(struct complex c1,struct complex c2);
-struct complex SubComp(struct complex c1,struct complex c2);
-struct complex SumComp(struct complex c1,struct complex c2);
-struct complex;
 
 #ifdef __cplusplus
 
 }
 #endif
 using namespace std;
-
+struct complex{
+    int x;
+    int y;
+};
 int main() {
-    std::cout << Sum(2,2) << std::endl;
-    struct complex c1;
-    c1.x = 2;
-    c1.y = 10;
-    struct complex c2;
-    c2.x = 26;
-    c2.y = 10;
-    SumComp(c1,c2);
+    cout << "select 1 if normal num, select 2 if complex num" << endl;
+    int num;
+    cin >> num;
+    if(num == 1){
+        cout << Sum(2,2);
+    }
+    if(num == 2){
+        complex (*SumComp)(complex c1,complex c2);
+        HMODULE hModule;
+        hModule=LoadLibrary(TEXT("libcomplex.dll"));
+        SumComp= reinterpret_cast<complex (*)(complex, complex)>(GetProcAddress(hModule, "SumComp"));
+        complex c1{1,2};
+        complex c2{2,2};
+        complex res = SumComp(c1,c2);
+        cout << res.x << endl << res.y << endl;
+    }
     return 0;
 }
