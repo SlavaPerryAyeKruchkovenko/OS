@@ -68,10 +68,12 @@ desktop/lab2/math/cmake-build-debug/
 
 desktop/lab2/math/.idea/
 
-desktop/lab2/complex/
-
 desktop/lab2/complex2/cmake-build-debug/
 
 desktop/lab2/complex2/.idea/
 
 desktop/lab2/complex2/
+
+desktop/lab2/complex/cmake-build-debug/
+
+desktop/lab2/complex/.idea/

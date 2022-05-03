@@ -12,9 +12,10 @@ double Sum(double num1, double num2);
 
 double Sub(double num1, double num2);
 
-void Mul1(double x1,double y1,double x2,double y2);
-void Sub1(double x1,double y1,double x2,double y2);
-void Sum1(double x1,double y1,double x2,double y2);
+struct complex MulComp(struct complex c1,struct complex c2);
+struct complex SubComp(struct complex c1,struct complex c2);
+struct complex SumComp(struct complex c1,struct complex c2);
+struct complex;
 
 #ifdef __cplusplus
 
@@ -24,6 +25,12 @@ using namespace std;
 
 int main() {
     std::cout << Sum(2,2) << std::endl;
-    Sum1(2,2,6,5);
+    struct complex c1;
+    c1.x = 2;
+    c1.y = 10;
+    struct complex c2;
+    c2.x = 26;
+    c2.y = 10;
+    SumComp(c1,c2);
     return 0;
 }
