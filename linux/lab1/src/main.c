@@ -4,16 +4,6 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define Uread 0x00400
-#define Uwrite 0x00200
-#define Uuse 0x00100
-#define Gread 0x00040
-#define Gwrite 0x00020
-#define Guse 0x00010
-#define Oread 0x00004
-#define Owrite 0x00002
-#define Ouse 0x00001
-
 void checkOwner(struct stat buf) {
   printf("\nowner ");
   if (buf.st_mode & S_IRUSR)
