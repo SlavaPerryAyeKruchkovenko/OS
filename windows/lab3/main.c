@@ -4,36 +4,34 @@
 
 
 const int n = 10000;
+const int countThread = 2;
+double res = 0;
 double function(double x){
     return 3/x;
 }
-DWORD WINAPI FuncThread1(LPVOID param){
-    int count = 0;
-    for (int i = 1; i < n; i+=2) {
-        *((double*)param) += function(i);
-    }
-    return 0;
-}
-DWORD WINAPI FuncThread2(LPVOID param){
-    int count = 0;
-    for (int i = 2; i < n; i+=2) {
-        *((double*)param) += function(i);
+DWORD WINAPI FuncThread(LPVOID param){
+    for (int i = 1; i <= n; i++) {
+        if(i %  countThread == *((int*)param)){
+            res += function(i);
+        }
     }
     return 0;
 }
 int main() {
-    double res = 0;
-    HANDLE hTreads[2];
+    int params[countThread];
+    params[0] = 0;
+    params[1] = 1;
+    HANDLE hTreads[countThread];
     hTreads[0] = CreateThread(NULL,
                               0,
-                              FuncThread1,
-                              &res,
+                              FuncThread,
+                              &params[0],
                               0,
                               NULL);
     hTreads[1] = CreateThread(NULL,
                               0,
-                              FuncThread2,
-                              &res,
+                              FuncThread,
+                              &params[1],
                               0,
                               NULL);
     WaitForMultipleObjects(2,hTreads,TRUE,INFINITE);
