@@ -88,3 +88,5 @@ desktop/lab3/library/cmake-build-debug/
 desktop/lab3/test/cmake-build-debug/
 
 desktop/lab3/test/.idea/
+
+desktop/lab3/test/test/obj/
